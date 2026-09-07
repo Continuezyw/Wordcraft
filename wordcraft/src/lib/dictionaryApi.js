@@ -1,53 +1,53 @@
-function phoneticFor(entry, region) {
-  const phonetics = entry.phonetics || []
-  const preferred = phonetics.find((item) => item.text && item.audio?.includes(region === 'uk' ? '-uk' : '-us'))
-  return preferred?.text || phonetics.find((item) => item.text)?.text || '—'
+const REQUEST_TIMEOUT_MS = 5000
+
+function splitDefinition(rawDefinition = '') {
+  const [partOfSpeech = 'word', ...definitionParts] = rawDefinition.split('\t')
+  return {
+    type: partOfSpeech.trim() || 'word',
+    definition: definitionParts.join('\t').trim() || rawDefinition.trim(),
+  }
 }
 
-function audioFor(entry, region) {
-  const phonetics = entry.phonetics || []
-  const preferred = phonetics.find((item) => item.audio && item.audio.includes(region === 'uk' ? '-uk' : '-us'))
-  return preferred?.audio || phonetics.find((item) => item.audio)?.audio || ''
+async function fetchWithTimeout(url) {
+  const controller = new AbortController()
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+  try {
+    return await fetch(url, { signal: controller.signal })
+  } catch (error) {
+    if (error.name === 'AbortError') throw new Error('TIMEOUT')
+    throw new Error('NETWORK_ERROR')
+  } finally {
+    window.clearTimeout(timeoutId)
+  }
 }
 
 export async function fetchDictionaryEntry(word) {
-  const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`)
-  if (!response.ok) {
-    if (response.status === 404) throw new Error('NOT_FOUND')
-    throw new Error('REQUEST_FAILED')
-  }
+  const response = await fetchWithTimeout(`https://api.datamuse.com/words?sp=${encodeURIComponent(word)}&md=d&max=1`)
+  if (!response.ok) throw new Error('NETWORK_ERROR')
 
-  const [entry] = await response.json()
-  const meanings = entry.meanings || []
-  const definitions = meanings.flatMap((meaning) => meaning.definitions?.map((item) => ({
-    type: meaning.partOfSpeech,
-    definition: item.definition,
-    example: item.example,
-    synonyms: item.synonyms || meaning.synonyms || [],
-    antonyms: item.antonyms || meaning.antonyms || [],
-  })) || [])
-  const primary = definitions[0]
+  const matches = await response.json()
+  const entry = matches.find((item) => item.word.toLowerCase() === word.toLowerCase())
+  const firstDefinition = entry?.defs?.[0]
 
-  if (!primary) throw new Error('NOT_FOUND')
+  if (!firstDefinition) throw new Error('NOT_FOUND')
 
-  const related = [...new Set([...primary.synonyms, ...primary.antonyms])].slice(0, 5)
-  const examples = definitions.map((item) => item.example).filter(Boolean).slice(0, 2)
-
+  const { type, definition } = splitDefinition(firstDefinition)
   return {
     word: entry.word,
-    type: primary.type || 'word',
+    type,
     level: '在线词典',
     syllables: entry.word,
-    uk: phoneticFor(entry, 'uk'),
-    us: phoneticFor(entry, 'us'),
-    ukAudio: audioFor(entry, 'uk'),
-    usAudio: audioFor(entry, 'us'),
-    definition: primary.definition,
+    uk: '—',
+    us: '—',
+    ukAudio: '',
+    usAudio: '',
+    definition,
     translations: [],
     forms: [],
-    examples,
-    related,
-    etymology: entry.origin || '',
-    source: 'Free Dictionary API',
+    examples: [],
+    related: [],
+    etymology: '',
+    source: 'Datamuse Dictionary API',
   }
 }

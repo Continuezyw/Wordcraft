@@ -50,8 +50,12 @@ function App() {
       if (localEntry) {
         setActiveEntry(localEntry)
         setSearchError('这个单词已在导入词表中，但在线词典暂未提供详情。')
+      } else if (error.message === 'NOT_FOUND') {
+        setSearchError('未找到该单词，请检查拼写后重试。')
+      } else if (error.message === 'TIMEOUT') {
+        setSearchError('在线词典查询超过 5 秒，已自动停止。请检查网络后重试。')
       } else {
-        setSearchError(error.message === 'NOT_FOUND' ? '未找到该单词，请检查拼写后重试。' : '暂时无法连接在线词典，请稍后再试。')
+        setSearchError('暂时无法连接在线词典，请检查网络后重试。')
       }
       setSearchState('error')
     }
