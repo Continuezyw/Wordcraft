@@ -100,6 +100,11 @@ dt { color: #8b948a; font-size: 11px; } dd { margin: 0; color: #3d4b3f; font: 11
 .empty-entry > span { color: #6d9675; font-size: 28px; }
 .empty-entry h3 { margin: 7px 0; color: #34543c; font: 600 23px Fraunces, serif; }
 .empty-entry p { max-width: 430px; margin: auto; color: #7b857b; font-size: 12px; line-height: 1.65; }
+.senses-section { margin: -11px 0 36px; }
+.senses-section ol { margin: 15px 0 0; padding: 0; list-style: none; }
+.senses-section li { padding: 12px 0; border-bottom: 1px solid #edf0e9; }
+.senses-section li span { color: #68806c; font: 10px 'DM Mono', monospace; text-transform: uppercase; }
+.senses-section li p { margin: 5px 0 0; color: #526054; font: 13px/1.55 Fraunces, serif; }
 .examples-section { margin-top: 42px; }
 .examples-section figure { position: relative; margin: 19px 0 0; padding: 3px 0 18px 57px; border-bottom: 1px solid #eceee7; }
 .example-index { position: absolute; top: 5px; left: 0; color: #a1aaa0; font: 11px 'DM Mono', monospace; }

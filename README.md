@@ -4,9 +4,9 @@
 
 ## 本地运行
 
-```bash
-npm install
-npm run dev
+```powershell
+npm --prefix ".\wordcraft" install
+npm --prefix ".\wordcraft" run dev
 ```
 
 打开终端显示的本地地址（一般为 `http://localhost:5173`）。
@@ -14,9 +14,9 @@ npm run dev
 ## 搜索与在线词典
 
 - 内置词条会直接显示完整内容。
-- 搜索其他英文单词时，网站调用 [Datamuse Dictionary API](https://www.datamuse.com/api/) 获取英文释义与词性。
-- 每次在线查询设有 **5 秒硬超时**：服务未在 5 秒内响应时，浏览器会取消请求并显示明确提示，查询按钮会立即恢复。
-- Datamuse 是第三方公共服务，网络不可用、服务未收录词条或字段不完整时，页面会显示提示而不会中断使用。
+- 搜索其他英文单词时，网站优先调用 [Free Dictionary API](https://dictionaryapi.dev/) 获取 IPA、音频、多个词性、英文释义、例句、相关词和词源。
+- 如果主接口在 **5 秒**内超时或网络不可用，网站会自动改用 [Datamuse Dictionary API](https://www.datamuse.com/api/) 作为备用，快速返回基础的英文释义、词性与音节信息。
+- 主接口与备用接口均设有硬超时；在线词典未收录或字段不完整时，页面会显示提示而不会中断使用。
 
 ## 导入 CSV 词库
 
@@ -34,8 +34,8 @@ beneficial,CET-6
 
 ## 构建生产版本
 
-```bash
-npm run build
+```powershell
+npm --prefix ".\wordcraft" run build
 ```
 
 构建后的静态网站位于 `dist/` 目录，可部署到 GitHub Pages、Netlify 或 Vercel。
